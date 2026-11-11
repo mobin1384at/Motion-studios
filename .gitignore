@@ -1,0 +1,10 @@
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+
+# Local render scratch (capture.mjs frames dir, see MOTION_STUDIO_TMPDIR)
+.frames-tmp/
+motion-studio-frames-*/

@@ -1,0 +1,36 @@
+<!-- HyperFrames block: chart-bars — animated bars that grow from zero to their value.
+     Usage: element with data-start (s) and data-duration (s); call seek(t) with the
+     global timeline time in seconds; the block renders frame t as a pure function of t.
+     Values: edit the data-value attributes (0..100). -->
+<div class="hf-block hf-chart" data-start="0" data-duration="3" dir="rtl" lang="fa">
+  <style>
+    .hf-chart{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;
+      gap:36px;padding:80px 60px;background:#FFFBF5;font-family:'Vazirmatn',sans-serif}
+    .hf-chart .bar-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;height:100%;justify-content:flex-end}
+    .hf-chart .bar{width:110px;background:#D4621A;border-radius:12px 12px 0 0;height:0}
+    .hf-chart .bar.alt{background:#2A7F6F}
+    .hf-chart .bar.alt2{background:#E9B44C}
+    .hf-chart .label{font-size:34px;font-weight:700;color:#2A1A0E}
+    .hf-chart .value{font-size:30px;font-weight:700;color:#D4621A}
+  </style>
+  <div class="bar-wrap"><span class="value">۰</span><div class="bar" data-value="72"></div><span class="label">کتاب</span></div>
+  <div class="bar-wrap"><span class="value">۰</span><div class="bar alt" data-value="100"></div><span class="label">فروش</span></div>
+  <div class="bar-wrap"><span class="value">۰</span><div class="bar alt2" data-value="45"></div><span class="label">تخفیف</span></div>
+  <script>
+    // seek(t): bars grow staggered (0.25s apart) with easeOutCubic; value counts up in sync.
+    window.hfChartSeek = function(t){
+      var block = document.querySelector('.hf-chart');
+      var start = parseFloat(block.dataset.start), dur = parseFloat(block.dataset.duration);
+      var lt = Math.max(0, Math.min(dur, t - start));
+      block.querySelectorAll('.bar-wrap').forEach(function(wrap, i){
+        var bar = wrap.querySelector('.bar'), val = wrap.querySelector('.value');
+        var target = parseFloat(bar.dataset.value);
+        var local = Math.max(0, Math.min(1, (lt - i*0.25) / 1.6));   // 1.6s grow, staggered
+        var e = 1 - Math.pow(1 - local, 3);                           // easeOutCubic
+        bar.style.height = (e * target * 5).toFixed(1) + 'px';        // 100 -> 500px max
+        val.textContent = Math.round(e * target).toLocaleString('fa-IR');
+      });
+    };
+    function seek(t){ window.hfChartSeek(t); }
+  </script>
+</div>

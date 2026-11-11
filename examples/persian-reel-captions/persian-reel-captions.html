@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<!-- Example: persian-reel-captions — Persian-caption reel (9:16, 1080x1920).
+     Word-pop captions: the active word is orange (#D97757), the rest white,
+     inside a dark rounded caption box, RTL layout, Lalezar display font.
+     Contract: seek(t) renders frame t as a pure function of t (deterministic).
+     Captions are driven by the WORDS table below — replace it with real
+     faster-whisper word timestamps (see README.md). See README for render commands. -->
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Persian Reel Captions — سپاریک</title>
+<style>
+  @font-face { font-family: 'Lalezar'; src: url('../../assets/fonts/Lalezar-Regular.ttf') format('truetype'); }
+  @font-face { font-family: 'Vazirmatn'; src: url('../../assets/fonts/Vazirmatn-Variable.ttf') format('truetype'); font-weight: 100 900; }
+  html, body { margin: 0; padding: 0; width: 1080px; height: 1920px; overflow: hidden; background: #1A120B; }
+  #stage { position: relative; width: 1080px; height: 1920px;
+    background: linear-gradient(160deg, #2A1A0E 0%, #7C2D12 55%, #1A120B 100%); }
+  #title { position: absolute; top: 240px; width: 100%; text-align: center;
+    font-family: 'Lalezar', sans-serif; font-size: 150px; color: #FFF7ED; }
+  #subtitle { position: absolute; top: 440px; width: 100%; text-align: center;
+    font-family: 'Vazirmatn', sans-serif; font-weight: 500; font-size: 46px; color: #FED7AA; }
+  /* Caption box: dark, rounded, bottom-anchored (safe zone: above the bottom 220px) */
+  #caption-box { position: absolute; left: 50%; bottom: 300px; transform: translateX(-50%);
+    max-width: 880px; padding: 28px 44px; border-radius: 28px;
+    background: rgba(20, 12, 6, 0.82); text-align: center; }
+  #caption-box .word { font-family: 'Lalezar', sans-serif; font-size: 72px; line-height: 1.35;
+    color: #FFFFFF; display: inline-block; margin: 0 6px; }
+  #caption-box .word.active { color: #D97757; transform: scale(1.12); }
+  #caption-box .word.done { color: #E7E5E4; }
+  #progress { position: absolute; bottom: 0; left: 0; height: 10px; background: #D97757; width: 0; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="title">سپاریک</div>
+  <div id="subtitle">کتاب خوب، دوباره خوانده می‌شود</div>
+  <div id="caption-box"></div>
+  <div id="progress"></div>
+</div>
+<script>
+  var DUR = 8;
+  // Word-level captions. Times are seconds; replace with faster-whisper output.
+  // Two caption lines, each shown as one chunk (words pop one by one).
+  var WORDS = [
+    { text: 'کتابت',     start: 0.4, end: 1.1 },
+    { text: 'را',        start: 1.1, end: 1.5 },
+    { text: 'بفروش،',    start: 1.5, end: 2.4 },
+    { text: 'کتاب',      start: 2.4, end: 3.1 },
+    { text: 'بعدی',      start: 3.1, end: 3.8 },
+    { text: 'را',        start: 3.8, end: 4.2 },
+    { text: 'بخر.',      start: 4.2, end: 5.0 },
+    { text: 'بدون',      start: 5.2, end: 5.9 },
+    { text: 'واسطه،',    start: 5.9, end: 6.6 },
+    { text: 'مستقیم',    start: 6.6, end: 7.2 },
+    { text: 'از',        start: 7.2, end: 7.5 },
+    { text: 'دانشجو.',   start: 7.5, end: 8.0 }
+  ];
+  var box = document.getElementById('caption-box');
+  var progress = document.getElementById('progress');
+
+  function render(t){
+    // Show the chunk of words around t (max 5 words per chunk, centred on the active word)
+    var active = -1;
+    for (var i = 0; i < WORDS.length; i++){
+      if (t >= WORDS[i].start && t < WORDS[i].end){ active = i; break; }
+    }
+    if (active === -1 && t >= WORDS[WORDS.length-1].end) active = WORDS.length - 1;
+    var html = '';
+    if (active >= 0){
+      var from = Math.max(0, active - 2), to = Math.min(WORDS.length - 1, active + 2);
+      for (var j = from; j <= to; j++){
+        var cls = j < active ? 'word done' : (j === active ? 'word active' : 'word');
+        html += '<span class="' + cls + '">' + WORDS[j].text + '</span>';
+      }
+    }
+    box.innerHTML = html;
+    box.style.opacity = active >= 0 ? '1' : '0';
+    progress.style.width = (Math.max(0, Math.min(DUR, t)) / DUR * 1080) + 'px';
+  }
+  function seek(t){ render(Math.max(0, Math.min(DUR, t))); }
+  window.seek = seek;
+  seek(0);
+</script>
+</body>
+</html>
